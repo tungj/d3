@@ -4519,7 +4519,7 @@
     return [ d3.min(values), d3.max(values) ];
   }
   d3.layout.hierarchy = function() {
-    var sort = d3_layout_hierarchySort, children = d3_layout_hierarchyChildren, value = d3_layout_hierarchyValue;
+    var sort = d3_layout_hierarchySort, children = d3_layout_hierarchyChildren, value = d3_layout_hierarchyValue, innerValue = null;
     function recurse(data, depth, nodes) {
       var childs = children.call(hierarchy, data, depth), node = d3_layout_hierarchyInline ? data : {
         data: data
@@ -4536,6 +4536,7 @@
         }
         if (sort) c.sort(sort);
         if (value) node.value = v;
+        if (innerValue) node.value += +innerValue.call(hierarchy, data, depth) || 0;
       } else if (value) {
         node.value = +value.call(hierarchy, data, depth) || 0;
       }
@@ -4572,6 +4573,11 @@
       value = x;
       return hierarchy;
     };
+    hierarchy.innerValue = function(x) {
+      if (!arguments.length) return innerValue;
+      innerValue = x;
+      return hierarchy;
+    };
     hierarchy.revalue = function(root) {
       revalue(root, 0);
       return root;
@@ -4579,7 +4585,7 @@
     return hierarchy;
   };
   function d3_layout_hierarchyRebind(object, hierarchy) {
-    d3.rebind(object, hierarchy, "sort", "children", "value");
+    d3.rebind(object, hierarchy, "sort", "children", "value", "innerValue");
     object.links = d3_layout_hierarchyLinks;
     object.nodes = function(d) {
       d3_layout_hierarchyInline = true;
@@ -7031,4 +7037,4 @@
   d3.time.scale.utc = function() {
     return d3_time_scale(d3.scale.linear(), d3_time_scaleUTCMethods, d3_time_scaleUTCFormat);
   };
-})();
+})();;
